@@ -1,3 +1,4 @@
+const bcrypt = require('bcrypt');
 const userService = require('../services/User');
 
 module.exports = {
@@ -23,7 +24,17 @@ module.exports = {
     },
     createUser: async (req, res) => {
         try {
-            const newUser = await userService.createUser(req.body);
+            const { username, email, password } = req.body;
+
+            // Hash the password before saving it to the database
+            const hashedPassword = await bcrypt.hash(password, 10);
+
+            // Create a new user object with the hashed password
+            const newUser = await userService.createUser({
+                username,
+                email,
+                password: hashedPassword,
+            });
             res.status(200).json(newUser);
         }
         catch (err) {
