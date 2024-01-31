@@ -12,9 +12,10 @@ module.exports = {
         }
 
     },
-    getUserById: async (req, res) => {
+    authenticate: async (req, res) => {
         try {
-            const user = await userService.getUserById(req.params.id);
+            const { email, password } = req.body;
+            const user = await userService.authenticate(email, password);
             res.status(200).json(user);
         }
         catch (err) {
@@ -26,8 +27,12 @@ module.exports = {
         try {
             const { username, email, password } = req.body;
 
+            if (!username || !email || !password)
+                return res.status(400).json({ error: "All fields are required." });
+
             // Hash the password before saving it to the database
-            const hashedPassword = await bcrypt.hash(password, 10);
+            const salt = await bcrypt.genSalt(10);
+            const hashedPassword = await bcrypt.hash(password, salt);
 
             // Create a new user object with the hashed password
             const newUser = await userService.createUser({

@@ -1,5 +1,5 @@
 const User = require("../models/User");
-
+const bcrypt = require('bcrypt')
 module.exports = {
     getAllUsers: async () => {
         const allUsers = await User.find({});
@@ -10,20 +10,34 @@ module.exports = {
         }));
     },
     //check for getUsersByIds
-    getUserById: async (strId) => {
-        const user = await User.findOne({ _id: strId });
-        const { name, imageURL } = user;
-        return {
-            name,
-            imageURL,
-        };
-
+    authenticate: async (email, password) => {
+        const user = await User.findOne({ email });
+        if (user && await bcrypt.compare(password, user.password))
+            return user;
     },
     createUser: async (userData) => {
-        //also add the date optional option
-        const newUser = new User(userData);
-        return newUser.save();
+        try {
+            const existingUser = await User.findOne({
+                $or: [{ email: userData.email }, { username: userData.username }],
+            });
+
+            if (existingUser) {
+                if (existingUser.email === userData.email) {
+                    return { user: null, message: "Email already exists!" };
+                } else {
+                    return { user: null, message: "Username is taken!" };
+                }
+            }
+
+            const newUser = new User(userData);
+            const savedUser = await newUser.save();
+            return { user: savedUser, message: "User created successfully!" };
+        } catch (error) {
+            console.error("Error creating User:", error);
+            throw new Error("Error creating User");
+        }
     },
+
     modifyUser: async (userData, id) => {
         try {
             const updatedUser = await User.findByIdAndUpdate(
