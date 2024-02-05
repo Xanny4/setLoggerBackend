@@ -25,8 +25,11 @@ module.exports = {
     },
     createSet: async (req, res) => {
         try {
-            const newset = await setService.createSet(req.body);
-            res.status(200).json(newset);
+            console.log(req.body);
+            console.log(req.userId);
+            const { exercise, reps, weight } = req.body;
+            const newset = await setService.createSet({ user: req.userId, exercise, reps, weight });
+            res.status(201).json(newset);
         }
         catch (err) {
             res.status(500).send(err);

@@ -1,5 +1,10 @@
 const bcrypt = require('bcrypt');
 const userService = require('../services/User');
+const jwt = require('jsonwebtoken');
+
+const generateToken = (user) => {
+    return jwt.sign({ userId: user.id }, process.env.JWT_SECRET, { expiresIn: '1h' }); // Expires in 1 hour
+}
 
 module.exports = {
     getAllUsers: async (req, res) => {
@@ -12,16 +17,27 @@ module.exports = {
         }
 
     },
+
     authenticate: async (req, res) => {
         try {
             const { email, password } = req.body;
             const user = await userService.authenticate(email, password);
-            res.status(200).json(user);
+            if (user) {
+                const token = generateToken(user);
+                console.log(token);
+                res.status(200).json({ token, user, message: 'Login successful!' });
+            } else {
+                res.json({ message: 'Invalid email or password. Please try again.' });
+            }
         }
         catch (err) {
             res.status(500).send(err);
         }
 
+    },
+    protectedRouteHandler: async (req, res) => {
+        // Access protected data using req.userId
+        res.json({ message: `Protected data for user ${req.userId}` });
     },
     createUser: async (req, res) => {
         try {
@@ -40,7 +56,7 @@ module.exports = {
                 email,
                 password: hashedPassword,
             });
-            res.status(200).json(newUser);
+            res.status(201).json(newUser);
         }
         catch (err) {
             res.status(500).send(err);
