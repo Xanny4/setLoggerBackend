@@ -3,9 +3,9 @@ const setService = require('../services/Set');
 module.exports = {
     getSets: async (req, res) => {
         try {
-            const { userId, exercise, dateStart, dateEnd, typeSort, page, pageSize } = req.query;
-            const sets = await setService.getSets(userId, exercise, dateStart, dateEnd, typeSort, page, pageSize);
-            res.status(200).json(sets);
+            const { exercise, dateStart, dateEnd, typeSort, sortOrder, page, pageSize } = req.query;
+            const { sets, totalPages } = await setService.getSets(req.userId, exercise, dateStart, dateEnd, typeSort, sortOrder, page, pageSize);
+            res.status(200).json({ sets, totalPages });
         }
         catch (err) {
             res.status(500).send(err);
@@ -25,8 +25,6 @@ module.exports = {
     },
     createSet: async (req, res) => {
         try {
-            console.log(req.body);
-            console.log(req.userId);
             const { exercise, reps, weight } = req.body;
             const newset = await setService.createSet({ user: req.userId, exercise, reps, weight });
             res.status(201).json(newset);

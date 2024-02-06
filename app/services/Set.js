@@ -1,25 +1,35 @@
 const Set = require("../models/Set");
 const WEEK = 1000 * 60 * 60 * 24 * 7;
 module.exports = {
-    getSets: async (userId, exercise, dateStart, dateEnd, typeSort, page = 1, pageSize = 10) => {
-        dateStart = Number(dateStart);
-        dateEnd = Number(dateEnd);
-        const sortBy = { [typeSort ? typeSort : "createdAt"]: 1 };
+    getSets: async (userId, exercise, dateStart, dateEnd, typeSort, sortOrder = "asc", page = 1, pageSize = 10) => {
+        try {
+            dateStart = Number(dateStart);
+            dateEnd = Number(dateEnd);
+            const sortBy = { [typeSort ? typeSort : "createdAt"]: sortOrder === "asc" ? 1 : -1 };
 
-        let query = {
-            user: userId,
-        };
-        if (dateStart && dateEnd)
-            query.createdAt = { $gte: dateStart, $lt: dateEnd };
+            let query = {
+                user: userId,
+            };
 
-        if (exercise) {
-            query.exercise = exercise;
+            if (dateStart && dateEnd)
+                query.createdAt = { $gte: dateStart, $lt: dateEnd };
+
+            if (exercise) {
+                query.exercise = exercise;
+            }
+
+            const skip = (page - 1) * pageSize;
+
+            // Perform two queries, one for counting total documents and one for fetching documents
+            const totalDocuments = await Set.countDocuments(query);
+            const totalPages = Math.ceil(totalDocuments / pageSize);
+
+            const sets = await Set.find(query).sort(sortBy).skip(skip).limit(pageSize);
+
+            return { sets, totalPages };
+        } catch (error) {
+            console.error("Error getting sets:", error);
         }
-
-        const skip = (page - 1) * pageSize;
-        const limit = pageSize;
-
-        return Set.find(query).sort(sortBy).skip(skip).limit(limit);
     },
 
     //check for getSetsByIds

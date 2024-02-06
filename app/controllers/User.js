@@ -24,7 +24,6 @@ module.exports = {
             const user = await userService.authenticate(email, password);
             if (user) {
                 const token = generateToken(user);
-                console.log(token);
                 res.status(200).json({ token, user, message: 'Login successful!' });
             } else {
                 res.json({ message: 'Invalid email or password. Please try again.' });
