@@ -24,7 +24,8 @@ module.exports = {
     },
     createExercise: async (req, res) => {
         try {
-            const newExercise = await exerciseService.createExercise(req.body);
+            const { exercise } = req.body;
+            const newExercise = await exerciseService.createExercise(exercise);
             res.status(200).json(newExercise);
         }
         catch (err) {

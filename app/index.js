@@ -9,7 +9,7 @@ require('dotenv').config();
 
 const app = express();
 
-app.use(cors());  // Use cors middleware
+app.use(cors());
 app.use(bodyParser.json());
 app.use('/api/sets', setRouter);
 app.use('/api/exercises', exerciseRouter);

@@ -1,11 +1,11 @@
 const controller = require('../controllers/Exercise');
 const router = require('express').Router();
-const cacheNoStore = require('../middlewares/cacheNoStore');
+const verifyToken = require('../middlewares/verifyToken');
 
-router.get('/', cacheNoStore, controller.getExercises);
-router.get('/:id', cacheNoStore, controller.getExerciseById);
-router.post('/', cacheNoStore, controller.createExercise);
-router.put('/:id', cacheNoStore, controller.modifyExercise);
-router.delete('/:id', cacheNoStore, controller.deleteExercise);
+router.get('/', verifyToken, controller.getExercises);
+router.get('/:id', verifyToken, controller.getExerciseById);
+router.post('/', verifyToken, controller.createExercise);
+router.put('/:id', verifyToken, controller.modifyExercise);
+router.delete('/:id', verifyToken, controller.deleteExercise);
 
 module.exports = router;

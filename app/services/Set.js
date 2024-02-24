@@ -3,8 +3,10 @@ const WEEK = 1000 * 60 * 60 * 24 * 7;
 module.exports = {
     getSets: async (userId, exercise, dateStart, dateEnd, typeSort, sortOrder = "asc", page = 1, pageSize = 10) => {
         try {
-            dateStart = Number(dateStart);
-            dateEnd = Number(dateEnd);
+            const startDate = dateStart ? new Date(dateStart) : null;
+            const endDate = dateEnd ? new Date(dateEnd) : null;
+
+
             const sortBy = { [typeSort ? typeSort : "createdAt"]: sortOrder === "asc" ? 1 : -1 };
 
             let query = {
@@ -12,7 +14,7 @@ module.exports = {
             };
 
             if (dateStart && dateEnd)
-                query.createdAt = { $gte: dateStart, $lt: dateEnd };
+                query.createdAt = { $gte: startDate, $lt: endDate };
 
             if (exercise) {
                 query.exercise = exercise;
@@ -20,7 +22,6 @@ module.exports = {
 
             const skip = (page - 1) * pageSize;
 
-            // Perform two queries, one for counting total documents and one for fetching documents
             const totalDocuments = await Set.countDocuments(query);
             const totalPages = Math.ceil(totalDocuments / pageSize);
 
@@ -32,7 +33,6 @@ module.exports = {
         }
     },
 
-    //check for getSetsByIds
     getSetById: async (strId) => {
         return await Set.findOne({ _id: strId });
     },

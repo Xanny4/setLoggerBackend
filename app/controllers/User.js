@@ -7,6 +7,15 @@ const generateToken = (user) => {
 }
 
 module.exports = {
+    getUser: async (req, res) => {
+        try {
+            const user = await userService.getUser(req.userId);
+            res.status(200).json(user);
+        }
+        catch (err) {
+            res.status(500).send(err);
+        }
+    },
     getAllUsers: async (req, res) => {
         try {
             const users = await userService.getAllUsers();
@@ -34,9 +43,16 @@ module.exports = {
         }
 
     },
-    protectedRouteHandler: async (req, res) => {
-        // Access protected data using req.userId
-        res.json({ message: `Protected data for user ${req.userId}` });
+    confirmPassword: async (req, res) => {
+        try {
+            const id = req.userId;
+            const { password } = req.body;
+            const confirmation = await userService.confirmPassword(id, password);
+            res.status(200).json(confirmation);
+        }
+        catch (err) {
+            res.status(500).send(err);
+        }
     },
     createUser: async (req, res) => {
         try {
@@ -45,11 +61,9 @@ module.exports = {
             if (!username || !email || !password)
                 return res.status(400).json({ error: "All fields are required." });
 
-            // Hash the password before saving it to the database
             const salt = await bcrypt.genSalt(10);
             const hashedPassword = await bcrypt.hash(password, salt);
 
-            // Create a new user object with the hashed password
             const newUser = await userService.createUser({
                 username,
                 email,
@@ -63,10 +77,10 @@ module.exports = {
     },
     modifyUser: async (req, res) => {
         try {
-            const id = req.params.id;
+            const id = req.userId;
             const user = req.body;
-            await userService.modifyUser(user, id);
-            res.status(200).json({ message: "User updated" });
+            const response = await userService.modifyUser(user, id);
+            res.status(200).json(response);
         }
         catch (err) {
             res.status(500).send(err);

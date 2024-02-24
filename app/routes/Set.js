@@ -7,7 +7,7 @@ router.get('/', verifyToken, controller.getSets);
 router.get('/:id', cacheNoStore, controller.getSetById);
 router.post('/', verifyToken, controller.createSet);
 router.put('/:id', cacheNoStore, controller.modifySet);
-router.delete('/:id', cacheNoStore, controller.deleteSet);
+router.delete('/:id', verifyToken, controller.deleteSet);
 
 
 module.exports = router;

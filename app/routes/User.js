@@ -3,12 +3,10 @@ const router = require('express').Router();
 const cacheNoStore = require('../middlewares/cacheNoStore');
 const verifyToken = require('../middlewares/verifyToken');
 
-router.get('/', cacheNoStore, controller.getAllUsers);
+router.get('/', verifyToken, controller.getUser);
 router.post('/authenticate', cacheNoStore, controller.authenticate);
+router.post('/confirmPassword', verifyToken, controller.confirmPassword);
 router.post('/', cacheNoStore, controller.createUser);
-router.put('/:id', cacheNoStore, controller.modifyUser);
-router.delete('/:id', cacheNoStore, controller.deleteUser);
-
-router.get('/protected-data', verifyToken, controller.protectedRouteHandler);
+router.put('/', verifyToken, controller.modifyUser);
 
 module.exports = router;

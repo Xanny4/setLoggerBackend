@@ -1,6 +1,15 @@
 const User = require("../models/User");
 const bcrypt = require('bcrypt')
 module.exports = {
+    getUser: async (id) => {
+        try {
+            return await User.findById(id);
+        }
+        catch {
+            console.error("Error finding User:", error);
+            throw new Error("Error finding User");
+        }
+    },
     getAllUsers: async () => {
         const allUsers = await User.find({});
         return allUsers.map(e => ({
@@ -9,11 +18,14 @@ module.exports = {
             imageURL: e.imageURL,
         }));
     },
-    //check for getUsersByIds
     authenticate: async (email, password) => {
         const user = await User.findOne({ email });
         if (user && await bcrypt.compare(password, user.password))
             return user;
+    },
+    confirmPassword: async (id, password) => {
+        const user = await User.findById(id);
+        return await bcrypt.compare(password, user.password);
     },
     createUser: async (userData) => {
         try {
@@ -40,6 +52,18 @@ module.exports = {
 
     modifyUser: async (userData, id) => {
         try {
+            const existingUserByEmail = await User.findOne({ email: userData.email, _id: { $ne: id } });
+            const existingUserByUsername = await User.findOne({ username: userData.username, _id: { $ne: id } });
+
+            let errors = {};
+            if (existingUserByEmail)
+                errors.email = "Email already exists!";
+            if (existingUserByUsername)
+                errors.username = "Username is taken!";
+
+            if (Object.keys(errors).length !== 0)
+                return { user: null, errors };
+
             const updatedUser = await User.findByIdAndUpdate(
                 id,
                 userData,
@@ -49,7 +73,7 @@ module.exports = {
             if (!updatedUser)
                 throw new Error("User not found");
 
-            return updatedUser;
+            return { user: updatedUser, message: "User Updated!" };
         }
         catch (error) {
             console.log(error);

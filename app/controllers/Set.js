@@ -12,7 +12,6 @@ module.exports = {
         }
 
     },
-    //check for getSetsByIds
     getSetById: async (req, res) => {
         try {
             const set = await setService.getSetById(req.params.id);
