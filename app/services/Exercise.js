@@ -7,7 +7,6 @@ module.exports = {
             const skip = (page - 1) * pageSize;
             const limit = pageSize;
 
-            // Use $lookup to join the Set collection with the Exercise collection
             const exercises = await Exercise.aggregate([
                 {
                     $lookup: {
@@ -22,17 +21,17 @@ module.exports = {
                         _id: 1,
                         name: 1,
                         imageURL: 1,
-                        sets: { $size: "$sets" } // Calculate the number of sets for each exercise
+                        sets: { $size: "$sets" }
                     }
                 },
                 {
                     $sort: { sets: -1 } // Sort by the number of sets
                 },
                 {
-                    $skip: skip // Pagination: skip results
+                    $skip: skip
                 },
                 {
-                    $limit: limit // Pagination: limit results
+                    $limit: limit
                 }
             ]);
 
